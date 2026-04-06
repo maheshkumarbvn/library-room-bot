@@ -41,7 +41,9 @@ log(f"🎯 URL: {URL}")
 # ========================
 
 PREFERRED_RANGES = [
+    ("4:00 pm", "5:30 pm"),
     ("4:30 pm", "5:30 pm"),
+    ("10:00 am", "11:00 am"),
     ("6:00 pm", "7:30 pm"),
     ("6:30 pm", "8:00 pm"),
     ("6:00 pm", "7:00 pm"),
@@ -164,9 +166,7 @@ try:
     log("🎉 Booking submitted successfully!")
 
 except Exception as e:
-    log(f"⚠️ Retry triggered: {str(e)}")
-    log(f"🔁 Retrying in {RETRY_INTERVAL} seconds...\n")
-    time.sleep(RETRY_INTERVAL)
+    log(f"⚠️ {str(e)}")
 
 # ========================
 # 🏁 CLEANUP
