@@ -26,7 +26,7 @@ RETRY_INTERVAL = int(os.getenv("RETRY_INTERVAL", "10"))  # seconds
 # ========================
 
 URL = f"https://www.calgarylibrary.ca/events-and-programs/book-a-space/book-a-room?date={DATE}&location={LOCATION_ID}&groupsize={GROUP_SIZE}"
-print(f"[{time.strftime('%H:%M:%S')}] )
+print(f"[{time.strftime('%H:%M:%S')}] ")
 
 # ========================
 # 🧠 PREFERRED TIME RANGES
@@ -39,7 +39,7 @@ PREFERRED_RANGES = [
     ("6:00 pm", "7:00 pm"),
     ("6:30 pm", "7:30 pm")
 ]
-print(f"[{time.strftime('%H:%M:%S')}] )
+print(f"[{time.strftime('%H:%M:%S')}] ")
 
 # ========================
 # 🪵 LOGGING HELPER
