@@ -162,7 +162,6 @@ try:
     driver.execute_script("arguments[0].click();", submit_btn)
 
     log("🎉 Booking submitted successfully!")
-    break
 
 except Exception as e:
     log(f"⚠️ Retry triggered: {str(e)}")
