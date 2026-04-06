@@ -16,7 +16,7 @@ LOCATION_ID = os.getenv("LOCATION_ID")
 GROUP_SIZE = os.getenv("GROUP_SIZE")
 
 MEETING_TITLE = os.getenv("MEETING_TITLE")
-USERNAME = os.getenv("NAME")   # ✅ replaced PHONE with USERNAME
+USERNAME = os.getenv("USERNAME")   # ✅ replaced PHONE with USERNAME
 PIN = os.getenv("PIN")
 
 RETRY_INTERVAL = int(os.getenv("RETRY_INTERVAL", "10"))  # seconds
