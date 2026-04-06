@@ -39,10 +39,7 @@ jobs:
           LOCATION_ID: ${{ secrets.LOCATION_ID }}
           GROUP_SIZE: ${{ secrets.GROUP_SIZE }}
           MEETING_TITLE: ${{ secrets.MEETING_TITLE }}
-          NAME: ${{ secrets.NAME }}
-          EMAIL: ${{ secrets.EMAIL }}
-          PHONE: ${{ secrets.PHONE }}
+          USERNAME: ${{ secrets.USERNAME }}
           PIN: ${{ secrets.PIN }}
-          PREFERRED_TIME: ${{ secrets.PREFERRED_TIME }}
           DISPLAY: ":99"
         run: python bot.py
