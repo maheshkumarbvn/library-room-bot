@@ -2,11 +2,11 @@ name: Book Library Room
 
 on:
   schedule:
-    - cron: '59 14 * * *'   # 8:59 AM Calgary (UTC-6 → 14:59 UTC)
-    - cron: '0 15 * * *'    # 9:00 AM
-    - cron: '1 15 * * *'    # 9:01 AM
+    - cron: '59 14 * * *'
+    - cron: '0 15 * * *'
+    - cron: '1 15 * * *'
 
-  workflow_dispatch:  # allows manual run
+  workflow_dispatch:
 
 jobs:
   run-bot:
@@ -24,14 +24,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-    - name: Install Google Chrome
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget gnupg
-        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
+      - name: Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Run bot
         env:
@@ -44,6 +44,5 @@ jobs:
           PHONE: ${{ secrets.PHONE }}
           PIN: ${{ secrets.PIN }}
           PREFERRED_TIME: ${{ secrets.PREFERRED_TIME }}
-        run: python bot.py
-        env:
           DISPLAY: ":99"
+        run: python bot.py
