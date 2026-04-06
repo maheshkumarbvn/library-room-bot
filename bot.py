@@ -16,21 +16,39 @@ LOCATION_ID = os.getenv("LOCATION_ID")
 GROUP_SIZE = os.getenv("GROUP_SIZE")
 
 MEETING_TITLE = os.getenv("MEETING_TITLE")
-NAME = os.getenv("NAME")
-EMAIL = os.getenv("EMAIL")
-PHONE = os.getenv("PHONE")
+USERNAME = os.getenv("NAME")   # ✅ replaced PHONE with USERNAME
 PIN = os.getenv("PIN")
 
-PREFERRED_TIME = os.getenv("PREFERRED_TIME")  # e.g. "5:59 AM,6:05 AM"
+RETRY_INTERVAL = int(os.getenv("RETRY_INTERVAL", "10"))  # seconds
 
 # ========================
 # 🌐 URL
 # ========================
+
 URL = f"https://www.calgarylibrary.ca/events-and-programs/book-a-space/book-a-room?date={DATE}&location={LOCATION_ID}&groupsize={GROUP_SIZE}"
+
+# ========================
+# 🧠 PREFERRED TIME RANGES
+# ========================
+
+PREFERRED_RANGES = [
+    ("6:00 pm", "7:30 pm"),
+    ("6:30 pm", "8:00 pm"),
+    ("6:00 pm", "7:00 pm"),
+    ("6:30 pm", "7:30 pm")
+]
+
+# ========================
+# 🪵 LOGGING HELPER
+# ========================
+
+def log(msg):
+    print(f"[{time.strftime('%H:%M:%S')}] {msg}")
 
 # ========================
 # 🚀 START BROWSER
 # ========================
+
 options = webdriver.ChromeOptions()
 options.add_argument("--headless=new")
 options.add_argument("--no-sandbox")
@@ -42,136 +60,109 @@ options.binary_location = "/usr/bin/google-chrome"
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 wait = WebDriverWait(driver, 25)
 
-print("🚀 Opening page...")
-driver.get(URL)
-
-time.sleep(5)
-
-print(f"📍 URL Loaded: {driver.current_url}")
-print("📄 Page title:", driver.title)
-
 # ========================
-# 🎯 FIND SLOTS
+# 🔁 RETRY LOOP
 # ========================
-print("🔍 Locating available time slots...")
 
-slots = driver.find_elements(By.XPATH, "//button[contains(@class,'fc-timegrid-slot')]")
-
-print(f"🧮 Total slots found: {len(slots)}")
-
-if len(slots) == 0:
-    print("❌ No slots detected. Page may not have loaded correctly.")
-    driver.quit()
-    exit()
-
-print("📝 Available slots:")
-for s in slots:
+while True:
     try:
-        print("-", s.text.strip())
-    except:
-        pass
+        log("🌐 Opening page...")
+        driver.get(URL)
 
-preferred_times = [t.strip() for t in PREFERRED_TIME.split(",")]
+        # ========================
+        # 🔹 CLICK VIEW AVAILABILITY
+        # ========================
+        try:
+            view_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@data-view-availability]")))
+            driver.execute_script("arguments[0].click();", view_btn)
+            log("✅ Clicked View Availability")
+        except:
+            log("⏳ Availability not open yet...")
+            raise Exception("Availability not ready")
 
-found_start = None
+        time.sleep(2)
 
-# ========================
-# 🎯 SELECT START TIME
-# ========================
-for slot in slots:
-    slot_text = slot.text.strip()
-    for pref in preferred_times:
-        if pref in slot_text:
-            print(f"✅ Matching start slot found: {slot_text}")
-            found_start = slot
-            break
-    if found_start:
+        # ========================
+        # 🔹 FETCH SLOTS
+        # ========================
+        slots = driver.find_elements(By.XPATH, "//ul[@data-times-list]//input[@data-time-slot]")
+
+        available_slots = []
+
+        for slot in slots:
+            if slot.is_enabled():
+                slot_id = slot.get_attribute("id")
+                label = driver.find_element(By.XPATH, f"//label[@for='{slot_id}']").text.strip()
+                available_slots.append((label, slot))
+
+        if not available_slots:
+            log("⏳ No available slots yet...")
+            raise Exception("No slots")
+
+        log(f"🧮 Available slots: {[s[0] for s in available_slots]}")
+
+        # ========================
+        # 🔹 MATCH PREFERRED RANGE
+        # ========================
+        selected_start = None
+        selected_end = None
+
+        slot_labels = [s[0] for s in available_slots]
+
+        for start, end in PREFERRED_RANGES:
+            if start in slot_labels and end in slot_labels:
+                log(f"🎯 Found slot: {start} → {end}")
+                selected_start = next(s for s in available_slots if s[0] == start)
+                selected_end = next(s for s in available_slots if s[0] == end)
+                break
+
+        if not selected_start:
+            log("⏳ Preferred time not available yet...")
+            raise Exception("Preferred slot not found")
+
+        # ========================
+        # 🔹 SELECT TIME
+        # ========================
+        log("👉 Selecting time slots...")
+        driver.execute_script("arguments[0].click();", selected_start[1])
+        time.sleep(1)
+        driver.execute_script("arguments[0].click();", selected_end[1])
+
+        # ========================
+        # 🔹 CLICK BOOK
+        # ========================
+        book_btn = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@data-booking-book-button]")))
+        driver.execute_script("arguments[0].click();", book_btn)
+        log("📌 Clicked Book")
+
+        # ========================
+        # 🔹 FILL FORM
+        # ========================
+        wait.until(EC.visibility_of_element_located((By.ID, "room-booking-login-form")))
+
+        driver.find_element(By.ID, "room-booking-form-meeting-title").send_keys(MEETING_TITLE)
+        driver.find_element(By.ID, "room-booking-form-cardnumber").send_keys(USERNAME)
+        driver.find_element(By.ID, "room-booking-form-password").send_keys(PIN)
+
+        log("✍️ Form filled")
+
+        # ========================
+        # 🔹 SUBMIT
+        # ========================
+        submit_btn = driver.find_element(By.XPATH, "//form[@id='room-booking-login-form']//button[@type='submit']")
+        driver.execute_script("arguments[0].click();", submit_btn)
+
+        log("🎉 Booking submitted successfully!")
         break
 
-if not found_start:
-    print("❌ Preferred start time not found. Exiting.")
-    driver.quit()
-    exit()
-
-# Click start slot
-print("👉 Clicking start time...")
-driver.execute_script("arguments[0].click();", found_start)
-
-time.sleep(2)
-
-# ========================
-# 🎯 HANDLE END TIME (GENERIC ATTEMPT)
-# ========================
-print("⏳ Attempting to select end time...")
-
-try:
-    # Try to find next clickable time slots (common UI pattern)
-    selectable_slots = driver.find_elements(By.XPATH, "//button[contains(@class,'fc-timegrid-slot')]")
-
-    if len(selectable_slots) > 1:
-        # Pick the next slot after the selected one
-        print("📌 Selecting next available slot as end time...")
-        driver.execute_script("arguments[0].click();", selectable_slots[1])
-    else:
-        print("⚠️ Could not determine end time automatically.")
-
-except Exception as e:
-    print("⚠️ End time selection failed:", str(e))
-
-# ========================
-# 📝 WAIT FOR FORM
-# ========================
-print("🧾 Waiting for booking form...")
-
-try:
-    wait.until(EC.presence_of_element_located((By.TAG_NAME, "form")))
-    print("✅ Form loaded.")
-except:
-    print("❌ Form did not load.")
-    driver.quit()
-    exit()
-
-# ========================
-# ✍️ FILL FORM
-# ========================
-def fill_field(label_text, value):
-    try:
-        field = driver.find_element(By.XPATH, f"//label[contains(text(),'{label_text}')]/following::input[1]")
-        field.send_keys(value)
-        print(f"✍️ Filled {label_text}")
     except Exception as e:
-        print(f"⚠️ Could not fill {label_text}: {e}")
-
-fill_field("Name", NAME)
-fill_field("Email", EMAIL)
-fill_field("Phone", PHONE)
-
-# Meeting title
-try:
-    driver.find_element(By.XPATH, "//input[contains(@name,'title')]").send_keys(MEETING_TITLE)
-    print("✍️ Meeting title filled")
-except:
-    print("⚠️ Meeting title field not found")
-
-# PIN
-try:
-    driver.find_element(By.XPATH, "//input[contains(@type,'password')]").send_keys(PIN)
-    print("🔐 PIN entered")
-except:
-    print("ℹ️ No PIN field present")
+        log(f"⚠️ Retry triggered: {str(e)}")
+        log(f"🔁 Retrying in {RETRY_INTERVAL} seconds...\n")
+        time.sleep(RETRY_INTERVAL)
 
 # ========================
-# ✅ SUBMIT
+# 🏁 CLEANUP
 # ========================
-try:
-    submit_btn = driver.find_element(By.XPATH, "//button[contains(text(),'Book')]")
-    print("🚀 Clicking Book button...")
-    submit_btn.click()
-except Exception as e:
-    print("❌ Submit button not found or clickable:", e)
 
 time.sleep(5)
-
-print("🏁 Booking flow completed (check result above).")
-
 driver.quit()
