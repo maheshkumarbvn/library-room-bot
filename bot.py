@@ -16,17 +16,25 @@ LOCATION_ID = os.getenv("LOCATION_ID")
 GROUP_SIZE = os.getenv("GROUP_SIZE")
 
 MEETING_TITLE = os.getenv("MEETING_TITLE")
-USERNAME = os.getenv("USERNAME")   # ✅ replaced PHONE with USERNAME
+USERNAME = os.getenv("USERNAME") 
 PIN = os.getenv("PIN")
 
 RETRY_INTERVAL = int(os.getenv("RETRY_INTERVAL", "10"))  # seconds
+
+# ========================
+# 🪵 LOGGING HELPER
+# ========================
+
+def log(msg):
+    print(f"[{time.strftime('%H:%M:%S')}] {msg}")
 
 # ========================
 # 🌐 URL
 # ========================
 
 URL = f"https://www.calgarylibrary.ca/events-and-programs/book-a-space/book-a-room?date={DATE}&location={LOCATION_ID}&groupsize={GROUP_SIZE}"
-print(f"[{time.strftime('%H:%M:%S')}] ")
+
+log(f"🎯 URL: {URL}")
 
 # ========================
 # 🧠 PREFERRED TIME RANGES
@@ -39,14 +47,8 @@ PREFERRED_RANGES = [
     ("6:00 pm", "7:00 pm"),
     ("6:30 pm", "7:30 pm")
 ]
-print(f"[{time.strftime('%H:%M:%S')}] ")
 
-# ========================
-# 🪵 LOGGING HELPER
-# ========================
-
-def log(msg):
-    print(f"[{time.strftime('%H:%M:%S')}] {msg}")
+log(f"🎯 PREFERRED_RANGES: {PREFERRED_RANGES}")
 
 # ========================
 # 🚀 START BROWSER
@@ -70,6 +72,7 @@ wait = WebDriverWait(driver, 25)
 while True:
     try:
         log("🌐 Opening page...")
+        log(f"🎯 URL: {URL}")
         driver.get(URL)
 
         # ========================
@@ -80,6 +83,7 @@ while True:
             driver.execute_script("arguments[0].click();", view_btn)
             log("✅ Clicked View Availability")
         except:
+            log(f"🎯 DATE: {DATE}")
             log("⏳ Availability not open yet...")
             raise Exception("Availability not ready")
 
@@ -99,8 +103,8 @@ while True:
                 available_slots.append((label, slot))
 
         if not available_slots:
-            log("⏳ No available slots yet...")
-            raise Exception("No slots")
+            log("⏳ No available slots in the PREFERRED_RANGES yet...")
+            raise Exception("No slots in the PREFERRED_RANGES")
 
         log(f"🧮 Available slots: {[s[0] for s in available_slots]}")
 
@@ -128,7 +132,7 @@ while True:
         # ========================
         log("👉 Selecting time slots...")
         driver.execute_script("arguments[0].click();", selected_start[1])
-        time.sleep(1)
+        time.sleep(2)
         driver.execute_script("arguments[0].click();", selected_end[1])
 
         # ========================
