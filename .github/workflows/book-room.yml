@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🕒 Print GitHub Trigger Time
+      - name: 🕒 Print GitHub Trigger Time and and Current Time in Calgary
         run: |
           echo "GitHub UTC Time:"
           date -u
-          echo "Local (Runner) Time:"
-          date
+          echo "MDT Time (Calgary):"
+          TZ="America/Edmonton" date
 
       - name: Checkout repo
         uses: actions/checkout@v3
