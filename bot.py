@@ -45,7 +45,7 @@ def should_run_now():
     now = datetime.now(ZoneInfo("America/Edmonton"))
 
     # Example: only act between 8:55–9:05 AM
-    if now.hour == 13 and now.minute >= 55:
+    if now.hour >= 15 and now.minute >= 01:
         return True
     if now.hour == 14 and now.minute <= 55:
         return True
