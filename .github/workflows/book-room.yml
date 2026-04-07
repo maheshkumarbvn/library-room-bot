@@ -2,11 +2,11 @@ name: Book Library Room
 
 on:
   schedule:
-    - cron: '59 3 * * *'   # 8:59 AM Calgary (UTC-6 → 14:59 UTC)
-    - cron: '0 4 * * *'    # 9:00 AM
-    - cron: '30 3 * * *'    # 9:01 AM
-    - cron: '10 1 * * *'    # 9:01 AM
-    - cron: '2 22 * * *'    # 9:01 AM
+    - cron: '59 03 * * *'   # 8:59 AM Calgary (UTC-6 → 14:59 UTC)
+    - cron: '10 04 * * *'    # 9:00 AM
+    - cron: '30 03 * * *'    # 9:01 AM
+    - cron: '45 02 * * *'    # 9:01 AM
+    - cron: '2 3 * * *'    # 9:01 AM
 
   workflow_dispatch:  # allows manual run
 
