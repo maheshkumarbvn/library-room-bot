@@ -65,15 +65,15 @@ PREFERRED_RANGES = [
 # ========================
 # 🧠 RUN_DATES
 # ========================
-RUN_DATES: '2026-04-06'
+RUN_DATES: "2026-04-06"
 
 # RUN_DATES = ["2026-04-05,2026-04-06,2026-04-07"]
 
 # ========================
 # 🧠 BOOKING_DATES
 # ========================
-BOOKING_DATES: '2026-05-06'
-#BOOKING_DATES = ["2026-05-06,2026-05-07"]
+BOOKING_DATES: "2026-05-06"
+# BOOKING_DATES = ["2026-05-06,2026-05-07"]
 
 log(f"🎯 RUN_DATES: {RUN_DATES}")
 log(f"🎯 BOOKING_DATES: {BOOKING_DATES}")
