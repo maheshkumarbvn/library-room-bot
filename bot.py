@@ -35,6 +35,29 @@ def log(msg):
     now_utc = datetime.utcnow()
     print(f"[UTC {now_utc.strftime('%H:%M:%S')} | MDT {now_mdt.strftime('%H:%M:%S')}] {msg}")
 
+log("⏱️ Printing time... ⏱️ ")
+
+# ========================
+# ⏱️ TIME-GATE LOGIC
+# ========================
+
+def should_run_now():
+    now = datetime.now(ZoneInfo("America/Edmonton"))
+
+    # Example: only act between 8:55–9:05 AM
+    if now.hour == 13 and now.minute >= 55:
+        return True
+    if now.hour == 14 and now.minute <= 55:
+        return True
+
+    return False
+
+
+if not should_run_now():
+    log("⏳ Outside execution window. Exiting.")
+    log("⏱️ Printing time... ⏱️ ")
+    exit()
+
 # ========================
 # ⏱️ RETRY LOGIC
 # ========================
