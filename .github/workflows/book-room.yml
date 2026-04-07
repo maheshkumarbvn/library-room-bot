@@ -2,21 +2,21 @@ name: Book Library Room
 
 on:
   schedule:
-    - cron: '59 04 * * *'   # 8:59 AM Calgary (UTC-6 → 14:59 UTC)
-    - cron: '30 05 * * *'   # 8:59 AM Calgary (UTC-6 → 14:59 UTC)
-    - cron: '59 03 * * *'   # 8:59 AM Calgary (UTC-6 → 14:59 UTC)
-    - cron: '10 04 * * *'    # 9:00 AM
-    - cron: '30 03 * * *'    # 9:01 AM
-    - cron: '45 02 * * *'    # 9:01 AM
-    - cron: '2 3 * * *'    # 9:01 AM
-
-  workflow_dispatch:  # allows manual run
+    - cron: '17 * * * *'   # ✅ Every hour at minute 0
+  workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
 
     steps:
+      - name: 🕒 Print GitHub Trigger Time
+        run: |
+          echo "GitHub UTC Time:"
+          date -u
+          echo "Local (Runner) Time:"
+          date
+
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Install Google Chrome
+      - name: Install Chrome
         run: |
           sudo apt-get update
           sudo apt-get install -y wget gnupg
@@ -37,13 +37,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-      - name: Run bot
+      - name: 🤖 Run bot
         env:
-          DATE: ${{ secrets.DATE }}
+          RUN_DATES: "2026-04-07,2026-04-08"
+          BOOKING_DATES: "2026-05-07,2026-05-08"
+
           LOCATION_ID: ${{ secrets.LOCATION_ID }}
           GROUP_SIZE: ${{ secrets.GROUP_SIZE }}
           MEETING_TITLE: ${{ secrets.MEETING_TITLE }}
           USERNAME: ${{ secrets.USERNAME }}
           PIN: ${{ secrets.PIN }}
-          DISPLAY: ":99"
+
         run: python bot.py
